@@ -8,12 +8,13 @@
 <h3>
 Siri LLama
 </h3>
+</div>
 
 Siri LLama is apple shortcut that access locally running LLMs through Siri or the shortcut UI on any apple device connected to the same network of your host machine. It uses Langchain and Ollama
 
 # Installation
 1. Install [Ollama](https://ollama.com/) for your machine, you have to run `ollama serve` in the terminal to start the server
-2. Install Langchain and Flask
+2. Install Langchain and Flask & run the flask app
 ```
 pip install --upgrade --quiet  langchain langchain-openai
 pip install flask
