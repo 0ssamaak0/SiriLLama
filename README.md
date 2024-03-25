@@ -28,7 +28,7 @@ pip install flask
 5. Run the shortcut through Siri or the shortcut UI
 
 # Note
-**SiriLLama** is the most simple langchain chatbot, there's huge room for improvement and customization, including model selection (even through APIs), RAG Applications or better LLM Memory options, etc.
+**SiriLLama** is the most simple langchain chatbot, there's huge room for improvement and customization, including model selection (even through OpenAI, Anthropic API), RAG Applications or better LLM Memory options, etc.
 
 # Common Issues
 - Even we access the flask app (not Ollama server directly), Some windows users who have Ollama installed via `WSL` have to make sure **ollama servere** is exposed to the network, [Check this issue for more details](https://github.com/ollama/ollama/issues/1431)
