@@ -21,7 +21,7 @@ Siri LLama is apple shortcut that access locally running LLMs through Siri or th
 pip install --upgrade --quiet  langchain langchain-openai
 pip install flask
 ```
-3. Download the shortcut from [here](https://www.icloud.com/shortcuts/4dd1bb0d7bda4314926adcd3ffdfd80d)
+3. Download the shortcut from [here](https://www.icloud.com/shortcuts/3bf9c6400e5049dd81b2df1e16754d3a)
 
 4. Enter your local IP address and the Flask port in the shortcut
 
