@@ -1,6 +1,6 @@
 <div align = "center">
 <h1>
-    <img src = "https://github.com/0ssamaak0/SiriLLama/blob/main/icon_nobng.png?raw=true" width = 200 height = 200>
+    <img src = "https://github.com/0ssamaak0/SiriLLama/blob/main/icon.png?raw=true" width = 200 height = 200>
 <br>
 
 </h1>
@@ -27,7 +27,7 @@ python3 app.py
 ```
 3. On your Apple device, Download the shortcut from [here](https://www.icloud.com/shortcuts/3bf9c6400e5049dd81b2df1e16754d3a)
 
-4. Run the shortcut through Siri or the shortcut UI, you will be asked to enter your local IP address and the Flask port first time you run the shortcut.
+4. Run the shortcut through Siri or the shortcut UI, in first time you run the shortcut you will be asked to enter your [IP address](https://stackoverflow.com/a/15864222) and the port number 
 
 # Note
 **SiriLLama** is the most simple langchain chatbot, there's huge room for improvement and customization, including model selection (even through OpenAI, Anthropic API), RAG Applications or better LLM Memory options, etc.
