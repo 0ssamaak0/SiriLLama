@@ -15,7 +15,7 @@ from operator import itemgetter
 import base64
 
 # ---------------- select your provider here ----------------
-provider = "fireworks"  # or provider = "fireworks"
+provider = "ollama"  # or provider = "fireworks"
 
 if provider == "ollama":
     from ollama_models import model, vmodel
