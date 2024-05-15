@@ -12,17 +12,32 @@ from langchain_core.prompts import (
 )
 
 from operator import itemgetter
-import base64
+
+from config import PROMPT_CHAT, PROMPT_VISUAL_CHAT, MEMORY_SIZE, ANSWER_SIZE_TOKENS
 
 # ---------------- select your provider here ----------------
-provider = "ollama"  # or provider = "fireworks"
+provider = "fireworks"  # or provider = "fireworks"
 
 if provider == "ollama":
-    from ollama_models import model, vmodel
-elif provider == "fireworks":
-    from fireworks_models import model, vmodel
+    from config import OLLAMA_CHAT, OLLAMA_VISUAL_CHAT
+    from langchain_community.chat_models import ChatOllama
 
+    model = ollama_model = ChatOllama(model=OLLAMA_CHAT)
+    vmodel = ollama_vmodel = ChatOllama(model=OLLAMA_VISUAL_CHAT)
+
+elif provider == "fireworks":
+    from config import FIREWORKS_CHAT, FIREWORKS_VISUAL_CHAT, FIREWORKS_API_KEY
+    from langchain_fireworks import ChatFireworks
+
+    model = ChatFireworks(model=FIREWORKS_CHAT, api_key=FIREWORKS_API_KEY)
+    vmodel = ChatFireworks(model=FIREWORKS_VISUAL_CHAT, api_key=FIREWORKS_API_KEY)
+
+# add any other provider here
+# elif ...
+else:
+    raise ValueError("Invalid provider")
 # ----------------------------------------------------------
+
 app = Flask(__name__)
 
 description_prompt = "What is this image? give detailed description of it. don't leave any detail. you will be asked about it"
@@ -72,7 +87,7 @@ prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            "You're Siri LLama, an open source AI smarter than Siri that runs on user's devices. You're helping a user with tasks, for any question answer very briefly (answer is about 30 words) and informatively. else, ask for more information.",
+            PROMPT_CHAT,
         ),
         MessagesPlaceholder(variable_name="history"),
         ("human", "{input}"),
@@ -84,7 +99,7 @@ vprompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            "You're Siri LLama, an open source AI that saw an image, and give answers about it. anytime you're asked about (it) answer about the image you've seen",
+            PROMPT_VISUAL_CHAT,
         ),
         MessagesPlaceholder(variable_name="history"),
         ("human", "{input}"),
@@ -92,7 +107,7 @@ vprompt = ChatPromptTemplate.from_messages(
 )
 
 # define memory and chains for chat model
-memory = ConversationBufferWindowMemory(k=5, return_messages=True)
+memory = ConversationBufferWindowMemory(k=MEMORY_SIZE, return_messages=True)
 
 chain1 = image_prompt | model | StrOutputParser()
 
@@ -134,12 +149,15 @@ def generate(user_input="Test"):
 @app.route("/", methods=["POST"])
 def generate_route():
     global main_chain1, main_chain2
-    prompt = request.json.get("prompt", "")
-    image = request.json.get("image", "")
-    reset = request.json.get("reset", "")
+    data = request.json
+    prompt = data.get("prompt", "")
+    image = data.get("image", "")
+    reset = data.get("reset", False)
+
     if reset:
         main_chain1 = chain1
         main_chain2 = chain2
+
     # first time only (vChat)
     if image != "":
         image = f"data:image/jpeg;base64,{image}"
