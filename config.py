@@ -15,4 +15,4 @@ OLLAMA_VISUAL_CHAT = "llava:7b"
 # Fireworks
 FIREWORKS_CHAT = "accounts/fireworks/models/llama-v3-70b-instruct"
 FIREWORKS_VISUAL_CHAT = "accounts/fireworks/models/llava-yi-34b"
-FIREWORKS_API_KEY = "GOtyI1w6nujfkksUvHvCiFHnDaAVP2HkTiDIxo4jwXALLZLo"
+FIREWORKS_API_KEY = "API_KEY"
