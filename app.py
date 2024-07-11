@@ -16,7 +16,7 @@ from operator import itemgetter
 from config import PROMPT_CHAT, PROMPT_VISUAL_CHAT, MEMORY_SIZE, ANSWER_SIZE_TOKENS
 
 # ---------------- select your provider here ----------------
-provider = "fireworks"  # or provider = "fireworks"
+provider = "fireworks"  # or provider = "ollama"
 
 if provider == "ollama":
     from config import OLLAMA_CHAT, OLLAMA_VISUAL_CHAT
