@@ -62,6 +62,7 @@ in `confing.py` set `MEMORY_SIZE` (How many previous messages to remember) and `
 ```
 
 4. On your Apple device, Download the shortcut from [here](https://www.icloud.com/shortcuts/4a1c41c6f4ec49908d0cd67cab7860b7)
+   Note that you must run the shortcut through Siri to "talk" to it, otherwise it will prompt you to type text.
 
 5. Run the shortcut through Siri or the shortcut UI, in first time you run the shortcut you will be asked to enter your [IP address](https://stackoverflow.com/a/15864222) and the port number showing in terminal
 ```bash
@@ -72,13 +73,14 @@ in `confing.py` set `MEMORY_SIZE` (How many previous messages to remember) and `
  * Running on http://192.168.1.134:5000
 Press CTRL+C to quit
 ```
-In the example above, the IP address is `192.168.1.134` and the port is `5000`
+In the example above, the IP address is `192.168.1.134` and the port is `5000` (default port is specified by Flask, change the line in main.py if needed)
 
 
 
 # Common Issues 🐞
 - Even we access the flask app (not Ollama server directly), Some windows users who have Ollama installed using `WSL` have to make sure **ollama servere** is exposed to the network, [Check this issue for more details](https://github.com/ollama/ollama/issues/1431)
-- Running the shortcut for the first time from Siri, will ask you to allow sending data to the server. it doesn't click in IOS 17.4, try to send any message from the shortcut UI to allow, then try again from Siri
+- When running the shortcut for the first time from Siri, it should ask for permission to send data to the Flask server.
+  If it doesn't work (especially on iOS 17.4), first try running the shortcut + sending a message from the iOS Shortcuts app to trigger the permissions dialog, then try running it through Siri again.
 
 # Other LLM Provider 🤖🤖
 Supposedly SiriLLama should work with any LLMs that including OpenAI, Claude, etc. but make sure first you installed the corresponding Langchain packages and set the models in `config.py`
