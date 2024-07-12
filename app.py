@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, Response
 
 from langchain_core.messages import HumanMessage
 from langchain_core.output_parsers import StrOutputParser
@@ -16,7 +16,7 @@ from operator import itemgetter
 from config import PROMPT_CHAT, PROMPT_VISUAL_CHAT, MEMORY_SIZE, ANSWER_SIZE_TOKENS
 
 # ---------------- select your provider here ----------------
-provider = "fireworks"  # or provider = "fireworks"
+provider = "fireworks"  # or provider = "ollama"
 
 if provider == "ollama":
     from config import OLLAMA_CHAT, OLLAMA_VISUAL_CHAT
@@ -171,8 +171,11 @@ def generate_route():
         memory.save_context({"input": description_prompt}, {"output": response})
         return response
 
-    response = generate(prompt)
-    return response
+    generated_response = generate(prompt)
+
+    resp = Response(generated_response)
+    resp.headers['content-type'] = 'text/plain; charset=utf-8'
+    return resp
 
 
 if __name__ == "__main__":
