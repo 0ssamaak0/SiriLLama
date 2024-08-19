@@ -1,0 +1,6 @@
+langchain==0.2.14
+langchain-community==0.2.12
+langchain-fireworks==0.1.7
+flask
+bs4
+chromadb

@@ -20,6 +20,11 @@ Siri LLama is apple shortcut that access locally running LLMs through Siri or th
 
 # Getting Started
 ## Requirements
+
+```bash
+pip install -r requirements.txt
+```
+
 ### Ollama Installation🦙
 1. Install [Ollama](https://ollama.com/) for your machine, you have to run `ollama serve` in the terminal to start the server
 
@@ -29,25 +34,12 @@ ollama run llama3 # chat model
 ollama run llava # multimodal
 ```
 
-3. Install Langchain and Flask
-```bash
-pip install --upgrade --quiet  langchain langchain-community
-pip install flask
-```
-
-4. in `config.py` set `OLLAMA_CHAT`, `OLLAMA_VISUAL_CHAT`, and `OLLAMA_EMBEDDINGS_MODEL` to the models you pulled from Ollama
+3. in `config.py` set `OLLAMA_CHAT`, `OLLAMA_VISUAL_CHAT`, and `OLLAMA_EMBEDDINGS_MODEL` to the models you pulled from Ollama
 ### Fireworks AI Installation🎆
 
-1.Install Langchain and Flask
+1. get your [Fireworks API Key](http://fireworks.ai/) and put it in `fireworks_models.py`
 
-```bash
-pip install --upgrade --quiet  langchain langchain-fireworks
-pip install flask
-```
-
-2. get your [Fireworks API Key](http://fireworks.ai/) and put it in `fireworks_models.py`
-
-3. in `config.py` set `FIREWORKS_CHAT`, `FIREWORKS_VISUAL_CHAT` and `FIREWORKS_EMBEDDINGS_MODEL` to the models you want to use from Fireworks AI. and set your and `FIREWORKS_API_KEY` 
+2. in `config.py` set `FIREWORKS_CHAT`, `FIREWORKS_VISUAL_CHAT` and `FIREWORKS_EMBEDDINGS_MODEL` to the models you want to use from Fireworks AI. and set your and `FIREWORKS_API_KEY` 
 
 ## Config
 in `confing.py` set `MEMORY_SIZE` (How many previous messages to remember) and `ANSWER_SIZE_WORDS` (How many words to generate in the answer)
