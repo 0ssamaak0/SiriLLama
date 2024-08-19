@@ -1,182 +1,202 @@
+import requests
+from bs4 import BeautifulSoup
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import Chroma
+from langchain.chains import RetrievalQA
 from flask import Flask, request, Response
-
 from langchain_core.messages import HumanMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 from langchain.memory import ConversationBufferWindowMemory
-
-from langchain_core.messages import SystemMessage
-from langchain_core.prompts import (
-    ChatPromptTemplate,
-    MessagesPlaceholder,
-)
-
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from operator import itemgetter
-
-from config import PROMPT_CHAT, PROMPT_VISUAL_CHAT, MEMORY_SIZE, ANSWER_SIZE_TOKENS
-
-# ---------------- select your provider here ----------------
-provider = "fireworks"  # or provider = "ollama"
-
-if provider == "ollama":
-    from config import OLLAMA_CHAT, OLLAMA_VISUAL_CHAT
-    from langchain_community.chat_models import ChatOllama
-
-    model = ollama_model = ChatOllama(model=OLLAMA_CHAT)
-    vmodel = ollama_vmodel = ChatOllama(model=OLLAMA_VISUAL_CHAT)
-
-elif provider == "fireworks":
-    from config import FIREWORKS_CHAT, FIREWORKS_VISUAL_CHAT, FIREWORKS_API_KEY
-    from langchain_fireworks import ChatFireworks
-
-    model = ChatFireworks(model=FIREWORKS_CHAT, api_key=FIREWORKS_API_KEY)
-    vmodel = ChatFireworks(model=FIREWORKS_VISUAL_CHAT, api_key=FIREWORKS_API_KEY)
-
-# add any other provider here
-# elif ...
-else:
-    raise ValueError("Invalid provider")
-# ----------------------------------------------------------
+from config import (
+    PROVIDER,
+    MAX_TOKENS,
+    PROMPT_CHAT,
+    PROMPT_VISUAL_CHAT,
+    MEMORY_SIZE,
+    CHUNCK_SIZE,
+    CHUNK_OVERLAP,
+)
 
 app = Flask(__name__)
 
-description_prompt = "What is this image? give detailed description of it. don't leave any detail. you will be asked about it"
+
+class AIProvider:
+    def __init__(self, provider_name):
+        self.provider_name = provider_name
+        self.model = None
+        self.vmodel = None
+        self.embeddings = None
+        self.setup_provider()
+
+    def setup_provider(self):
+        if self.provider_name == "ollama":
+            from config import (
+                OLLAMA_CHAT,
+                OLLAMA_VISUAL_CHAT,
+                OLLAMA_EMBEDDINGS_MODEL,
+            )
+            from langchain_community.chat_models import ChatOllama
+            from langchain_community.embeddings import OllamaEmbeddings
+
+            self.EMBEDDINGS_MODEL = OLLAMA_EMBEDDINGS_MODEL
+
+            self.model = ChatOllama(model=OLLAMA_CHAT)
+            self.vmodel = ChatOllama(model=OLLAMA_VISUAL_CHAT)
+            self.embeddings = OllamaEmbeddings(model=OLLAMA_EMBEDDINGS_MODEL)
+
+        elif self.provider_name == "fireworks":
+            from config import (
+                FIREWORKS_CHAT,
+                FIREWORKS_VISUAL_CHAT,
+                FIREWORKS_API_KEY,
+                FIREWORKS_EMBEDDINGS_MODEL,
+            )
+            from langchain_fireworks import ChatFireworks, FireworksEmbeddings
+
+            self.model = ChatFireworks(model=FIREWORKS_CHAT, api_key=FIREWORKS_API_KEY)
+            self.vmodel = ChatFireworks(
+                model=FIREWORKS_VISUAL_CHAT, api_key=FIREWORKS_API_KEY
+            )
+            self.embeddings = FireworksEmbeddings(
+                model=FIREWORKS_EMBEDDINGS_MODEL, fireworks_api_key=FIREWORKS_API_KEY
+            )
+        else:
+            raise ValueError("Invalid provider")
 
 
-# image prompt (for vChat)
-def image_prompt(data):
-    """
-    This function takes a dictionary 'data' as input which should contain keys 'image' and 'text'.
-    It tries to encode the image if it's not already encoded. If the image is already encoded, it uses the encoded image.
-    It then creates a 'HumanMessage' which is a list containing two dictionaries - 'text_part' and 'image_part'.
-    'text_part' is a dictionary with 'type' as 'text' and 'text' as the text from the input data.
-    'image_part' is a dictionary with 'type' as 'image_url' and 'image_url' as a dictionary containing 'url' as the encoded image.
-    The function returns the 'HumanMessage'.
+class AIChat:
+    def __init__(self, provider):
+        self.provider = provider
+        self.memory = ConversationBufferWindowMemory(
+            k=MEMORY_SIZE, return_messages=True
+        )
+        self.setup_chains()
+        self.vectorstore = None
 
-    Parameters:
-    data (dict): A dictionary containing 'image' and 'text'. 'image' could be a local image or an already encoded image.
+    def setup_chains(self):
+        self.text_prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", PROMPT_CHAT),
+                MessagesPlaceholder(variable_name="history"),
+                ("human", "{input}"),
+            ]
+        )
+        self.visual_prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", PROMPT_VISUAL_CHAT),
+                MessagesPlaceholder(variable_name="history"),
+                ("human", "{input}"),
+            ]
+        )
 
-    Returns:
-    list: A list containing two dictionaries - 'text_part' and 'image_part'.
-    """
-    # try:
-    #     image = data["img"]
-    #     encoded_image = encode_image(image)
-    # except:
-    #     encoded_image = data["img"]
+        self.create_chain(is_visual=False)
 
-    image_part = {
-        "type": "image_url",
-        "image_url": {
-            "url": data["img"],
-        },
-    }
-    if "ChatOllama" in str(type(model)):
+    def create_chain(self, is_visual=False):
+        model = self.provider.vmodel if is_visual else self.provider.model
+        prompt = self.visual_prompt if is_visual else self.text_prompt
+
+        self.initial_chain = self.image_prompt | model | StrOutputParser()
+        self.conversation_chain = (
+            RunnablePassthrough.assign(
+                history=RunnableLambda(self.memory.load_memory_variables)
+                | itemgetter("history")
+            )
+            | prompt
+            | model
+            | StrOutputParser()
+        )
+
+    def image_prompt(self, data):
         image_part = {
             "type": "image_url",
-            "image_url": data["img"],
+            "image_url": {"url": data["img"]},
         }
+        if "ChatOllama" in str(type(self.provider.model)):
+            image_part = {
+                "type": "image_url",
+                "image_url": data["img"],
+            }
+        text_part = {
+            "type": "text",
+            "text": "What is this image? Give a detailed description of it. Don't leave any detail out. You will be asked about it.",
+        }
+        return [HumanMessage(content=[image_part]), HumanMessage(content=[text_part])]
 
-    text_part = {"type": "text", "text": description_prompt}
+    def generate(self, user_input, max_tokens=None):
+        if not user_input:
+            return "End of conversation"
+        inputs = {"input": user_input}
 
-    return [HumanMessage(content=[image_part]), HumanMessage(content=[text_part])]
+        if self.vectorstore:
+            qa_chain = RetrievalQA.from_chain_type(
+                self.provider.model, retriever=self.vectorstore.as_retriever()
+            )
+            response = qa_chain.invoke({"query": user_input, "max_tokens": max_tokens})
+            response = response["result"]
+        else:
+            response = self.conversation_chain.invoke(inputs)
 
+        self.memory.save_context(inputs, {"output": response})
+        return response
 
-# Prompt for chat
-prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            PROMPT_CHAT,
-        ),
-        MessagesPlaceholder(variable_name="history"),
-        ("human", "{input}"),
-    ]
-)
+    def reset(self):
+        self.create_chain(is_visual=False)
+        self.memory.clear()
+        self.vectorstore = None
 
-# Prompt for vchat
-vprompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            PROMPT_VISUAL_CHAT,
-        ),
-        MessagesPlaceholder(variable_name="history"),
-        ("human", "{input}"),
-    ]
-)
+    def process_image(self, image):
+        self.create_chain(is_visual=True)
+        response = self.initial_chain.invoke({"img": image})
+        self.memory.save_context({"input": "Describe the image"}, {"output": response})
+        return response
 
-# define memory and chains for chat model
-memory = ConversationBufferWindowMemory(k=MEMORY_SIZE, return_messages=True)
+    def process_url(self, url):
+        text = self.extract_text_from_url(url)
+        self.create_vectorstore(text)
+        return f"Processed URL: {url}. Ready for questions about its content."
 
-chain1 = image_prompt | model | StrOutputParser()
+    def extract_text_from_url(self, url):
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        return soup.get_text()
 
-chain2 = (
-    RunnablePassthrough.assign(
-        history=RunnableLambda(memory.load_memory_variables) | itemgetter("history")
-    )
-    | prompt
-    | model
-    | StrOutputParser()
-)
-
-vchain1 = image_prompt | vmodel | StrOutputParser()
-
-vchain2 = (
-    RunnablePassthrough.assign(
-        history=RunnableLambda(memory.load_memory_variables) | itemgetter("history")
-    )
-    | vprompt
-    | vmodel
-    | StrOutputParser()
-)
-
-# main chains are chat chains by default
-main_chain1 = chain1
-main_chain2 = chain2
+    def create_vectorstore(self, text):
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=CHUNCK_SIZE, chunk_overlap=CHUNK_OVERLAP
+        )
+        splits = text_splitter.split_text(text)
+        print("Creating vectorstore")
+        self.vectorstore = Chroma.from_texts(splits, self.provider.embeddings)
 
 
-def generate(user_input="Test"):
-    print(f'current memory:\n{memory.load_memory_variables({""})}')
-    if user_input == "":
-        return "End of conversation"
-    inputs = {"input": f"{user_input}"}
-    response = main_chain2.invoke({"input": user_input})
-    memory.save_context(inputs, {"output": response})
-    return response
+ai_provider = AIProvider(PROVIDER)
+ai_chat = AIChat(ai_provider)
 
 
 @app.route("/", methods=["POST"])
 def generate_route():
-    global main_chain1, main_chain2
     data = request.json
     prompt = data.get("prompt", "")
     image = data.get("image", "")
+    url = data.get("url", "")
     reset = data.get("reset", False)
 
     if reset:
-        main_chain1 = chain1
-        main_chain2 = chain2
+        ai_chat.reset()
 
-    # first time only (vChat)
+    if url != "":
+        response = ai_chat.process_url(url)
     if image != "":
         image = f"data:image/jpeg;base64,{image}"
-        main_chain1 = vchain1
-        main_chain2 = vchain2
-        response = main_chain1.invoke(
-            {
-                "img": image,
-            }
-        )
-        memory.save_context({"input": description_prompt}, {"output": response})
-        return response
+        response = ai_chat.process_image(image)
+    else:
+        response = ai_chat.generate(prompt, max_tokens=MAX_TOKENS)
 
-    generated_response = generate(prompt)
-
-    resp = Response(generated_response)
-    resp.headers['content-type'] = 'text/plain; charset=utf-8'
-    return resp
+    return Response(response, content_type="text/plain; charset=utf-8")
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", port=5001)

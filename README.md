@@ -14,7 +14,9 @@ Siri LLama is apple shortcut that access locally running LLMs through Siri or th
 
 [Demo Video🎬](https://twitter.com/0ssamaak0/status/1772356905064665530)
 
-[🆕 Multimodal support 🎬](https://twitter.com/0ssamaak0/status/1782462691291890148)
+[Multimodal Video 🎬](https://twitter.com/0ssamaak0/status/1782462691291890148)
+
+[RAG Video 🎬]()
 
 # Getting Started
 ## Requirements
@@ -33,7 +35,7 @@ pip install --upgrade --quiet  langchain langchain-community
 pip install flask
 ```
 
-4. in `config.py` set `OLLAMA_CHAT` and `OLLAMA_VISUAL_CHAT` to the models you pulled from Ollama
+4. in `config.py` set `OLLAMA_CHAT`, `OLLAMA_VISUAL_CHAT`, and `OLLAMA_EMBEDDINGS_MODEL` to the models you pulled from Ollama
 ### Fireworks AI Installation🎆
 
 1.Install Langchain and Flask
@@ -45,7 +47,7 @@ pip install flask
 
 2. get your [Fireworks API Key](http://fireworks.ai/) and put it in `fireworks_models.py`
 
-3. in `config.py` set `FIREWORKS_CHAT` and `vchat_model` to the models you want to use from Fireworks AI. and set your and `FIREWORKS_API_KEY` 
+3. in `config.py` set `FIREWORKS_CHAT`, `FIREWORKS_VISUAL_CHAT` and `FIREWORKS_EMBEDDINGS_MODEL` to the models you want to use from Fireworks AI. and set your and `FIREWORKS_API_KEY` 
 
 ## Config
 in `confing.py` set `MEMORY_SIZE` (How many previous messages to remember) and `ANSWER_SIZE_WORDS` (How many words to generate in the answer)
@@ -61,7 +63,7 @@ in `confing.py` set `MEMORY_SIZE` (How many previous messages to remember) and `
 >>> python3 app.py
 ```
 
-4. On your Apple device, Download the shortcut from [here](https://www.icloud.com/shortcuts/4a1c41c6f4ec49908d0cd67cab7860b7)
+4. On your Apple device, Download the shortcut from [here](https://www.icloud.com/shortcuts/ec1fabee764b42c99d41bfdbdc16c3a8)
    Note that you must run the shortcut through Siri to "talk" to it, otherwise it will prompt you to type text.
 
 5. Run the shortcut through Siri or the shortcut UI, in first time you run the shortcut you will be asked to enter your [IP address](https://stackoverflow.com/a/15864222) and the port number showing in terminal
