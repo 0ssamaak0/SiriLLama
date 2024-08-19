@@ -12,11 +12,11 @@ Siri LLama
 
 Siri LLama is apple shortcut that access locally running LLMs through Siri or the shortcut UI on any apple device connected to the same network of your host machine. It uses Langchain 🦜🔗 and supports open source models from both [Ollama](https://ollama.com/) 🦙 or [Fireworks AI](https://fireworks.ai/) 🎆
 
-[Demo Video🎬](https://twitter.com/0ssamaak0/status/1772356905064665530)
+🟣 [Simple Chat Video🎬](https://twitter.com/0ssamaak0/status/1772356905064665530)
 
-[Multimodal Video 🎬](https://twitter.com/0ssamaak0/status/1782462691291890148)
+🟣 [Multimodal Video 🎬](https://twitter.com/0ssamaak0/status/1782462691291890148)
 
-[RAG Video 🎬]()
+🟣 [RAG Video 🎬](https://x.com/0ssamaak0/status/1825662881284653149)
 
 # Getting Started
 ## Requirements
