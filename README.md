@@ -55,7 +55,7 @@ in `confing.py` set `MEMORY_SIZE` (How many previous messages to remember) and `
 >>> python3 app.py
 ```
 
-4. On your Apple device, Download the shortcut from [here](https://www.icloud.com/shortcuts/ec1fabee764b42c99d41bfdbdc16c3a8)
+4. On your Apple device, Download the shortcut from [here](https://www.icloud.com/shortcuts/fd032a4e75cc4d81a6f9a742053d4c18)
    Note that you must run the shortcut through Siri to "talk" to it, otherwise it will prompt you to type text.
 
 5. Run the shortcut through Siri or the shortcut UI, in first time you run the shortcut you will be asked to enter your [IP address](https://stackoverflow.com/a/15864222) and the port number showing in terminal
@@ -68,6 +68,8 @@ in `confing.py` set `MEMORY_SIZE` (How many previous messages to remember) and `
 Press CTRL+C to quit
 ```
 In the example above, the IP address is `192.168.1.134` and the port is `5000` (default port is specified by Flask, change the line in main.py if needed)
+
+6. If you are using Siri to interact with the shortcut, saying "Good Bye" will stop Siri.
 
 
 
