@@ -63,11 +63,11 @@ in `confing.py` set `MEMORY_SIZE` (How many previous messages to remember) and `
 >>> python app.py
 ...
  * Running on all addresses (0.0.0.0)
- * Running on http://127.0.0.1:5000
- * Running on http://192.168.1.134:5000
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.134:5001
 Press CTRL+C to quit
 ```
-In the example above, the IP address is `192.168.1.134` and the port is `5000` (default port is specified by Flask, change the line in main.py if needed)
+In the example above, the IP address is `192.168.1.134` and the port is `5001` (default port is specified by Flask, change the line in main.py if needed)
 
 6. If you are using Siri to interact with the shortcut, saying "Good Bye" will stop Siri.
 
@@ -78,6 +78,6 @@ In the example above, the IP address is `192.168.1.134` and the port is `5000` (
 - When running the shortcut for the first time from Siri, it should ask for permission to send data to the Flask server.
   If it doesn't work (especially on iOS 17.4), first try running the shortcut + sending a message from the iOS Shortcuts app to trigger the permissions dialog, then try running it through Siri again.
 
-# Other LLM Provider 🤖🤖
+# Other LLM Providers 🤖🤖
 Supposedly SiriLLama should work with any LLMs that including OpenAI, Claude, etc. but make sure first you installed the corresponding Langchain packages and set the models in `config.py`
 
