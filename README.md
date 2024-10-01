@@ -83,3 +83,15 @@ In the example above, the IP address is `192.168.1.134` and the port is `5001` (
 # Other LLM Providers 🤖🤖
 Supposedly SiriLLama should work with any LLMs that including OpenAI, Claude, etc. but make sure first you installed the corresponding Langchain packages and set the models in `config.py`
 
+# SiriLLama on public network 🌎
+- Running SiriLLama outside your local network is possible with a tool called ngrok. It's going to expose one or multiple ports on your local machine. Step by step tutorial:
+  1. Start the ngrok server from cmd/terminal with the following command:
+```bash
+ngrok http localhost:5001
+```
+  2. It will give you a https link, something like https://xyzz-xxx-xxx-xxx-xxx.ngrok-free.app
+  3. In the shortcut you downloaded earlier insert the link from ngrok without https:// and leave the port number field empty
+  4. Now you should be able to run SiriLLama outside from your network. (In case you are unable to get valid response or something went wrong, try paste the ngrok link into safari and allow the connection within the browser)
+
+# Good to know 💡💡
+- Using the multimodel feature is only possible with images that arent in HEIF format. You can change this in your camera settings (it wont affect your existing photos) under formats choose most compatible and you are good to go.
